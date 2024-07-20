@@ -15,7 +15,13 @@ public class DrawerInteractable2 : XRGrabInteractable
     XRSocketInteractor keySocket;
 
     [SerializeField]
-    bool isLocked;
+    public bool isLocked;
+
+    [SerializeField]
+    GameObject lightPointer1;
+
+    [SerializeField]
+    GameObject lightPointer2;
 
     private Transform parentTransform;
     private const string defaultLayer = "Default";
@@ -45,6 +51,11 @@ public class DrawerInteractable2 : XRGrabInteractable
     {
         isLocked = false;
         Debug.Log("Drawer Unlocked");
+        if (lightPointer1 != null && lightPointer2 != null)
+        {
+            lightPointer1.SetActive(false);
+            lightPointer2.SetActive(false);
+        }
     }
 
     private void OnDrawerLocked(SelectExitEventArgs arg0)
