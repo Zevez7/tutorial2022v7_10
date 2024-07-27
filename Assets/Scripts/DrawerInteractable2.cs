@@ -24,8 +24,8 @@ public class DrawerInteractable2 : XRGrabInteractable
     GameObject lightPointer2;
 
     private Transform parentTransform;
-    private const string defaultLayer = "Default";
-    private const string grabLayer = "Grab";
+    private const string Default_Layer = "Default";
+    private const string Grab_Layer = "Grab";
     private bool isGrabbed;
 
     private Vector3 limitPosition;
@@ -74,14 +74,14 @@ public class DrawerInteractable2 : XRGrabInteractable
         }
         else
         {
-            ChangeLayerMask(defaultLayer);
+            ChangeLayerMask(Default_Layer);
         }
     }
 
     protected override void OnSelectExited(SelectExitEventArgs args)
     {
         base.OnSelectExited(args);
-        ChangeLayerMask(grabLayer);
+        ChangeLayerMask(Grab_Layer);
         isGrabbed = false;
         transform.localPosition = drawerTransform.localPosition;
     }
@@ -108,20 +108,20 @@ public class DrawerInteractable2 : XRGrabInteractable
             || transform.localPosition.x <= limitPosition.x - limitDistances.x
         )
         {
-            ChangeLayerMask(defaultLayer);
+            ChangeLayerMask(Default_Layer);
         }
         else if (
             transform.localPosition.y >= limitPosition.y + limitDistances.y
             || transform.localPosition.y <= limitPosition.y - limitDistances.y
         )
         {
-            ChangeLayerMask(defaultLayer);
+            ChangeLayerMask(Default_Layer);
         }
         else if (drawerTransform.localPosition.z <= limitPosition.z - limitDistances.z)
         {
             isGrabbed = false;
             drawerTransform.localPosition = limitPosition;
-            ChangeLayerMask(defaultLayer);
+            ChangeLayerMask(Default_Layer);
         }
         else if (drawerTransform.localPosition.z >= drawerlimitz + limitDistances.z)
         {
@@ -131,7 +131,7 @@ public class DrawerInteractable2 : XRGrabInteractable
                 drawerTransform.localPosition.y,
                 drawerlimitz
             );
-            ChangeLayerMask(defaultLayer);
+            ChangeLayerMask(Default_Layer);
         }
     }
 
