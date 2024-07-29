@@ -1,20 +1,20 @@
 using System.Collections.Generic;
-
-using Unity.VisualScripting;
-
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.Events;
 [ExecuteAlways]
 //yes
 public class TheWall : MonoBehaviour
 {
+    public UnityEvent OnDestroy;
     [SerializeField] int columns;
     [SerializeField] int rows;
     [SerializeField] GameObject wallCubePrefab;
     [SerializeField] GameObject socketWallPrefab;
 
     [SerializeField] int socketPosition = 1;
-    XRSocketInteractor wallSocket;
+    [SerializeField] XRSocketInteractor wallSocket;
+    [SerializeField] ExplosiveDevice explosiveDevice;
     [SerializeField] List<GenerateColumn> generatedColumn;
     GameObject[] wallCubes;
 
@@ -27,12 +27,23 @@ public class TheWall : MonoBehaviour
     [SerializeField] bool buildWall;
     [SerializeField] bool deleteWall;
     [SerializeField] bool destroyWall;
+    [SerializeField] int maxPower;
+    [SerializeField] AudioClip destroyWallClip;
 
+    public AudioClip GetDestroyClip => destroyWallClip;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        if (wallSocket != null)
+        {
+            wallSocket.onSelectEntered.AddListener(OnSocketEnter);
+            wallSocket.onSelectExited.AddListener(OnSocketExited);
+        }
+        if (explosiveDevice != null)
+        {
+            explosiveDevice.OnDetonated.AddListener(OnDestroyWall);
+        }
 
     }
 
@@ -49,22 +60,22 @@ public class TheWall : MonoBehaviour
         {
             if (i == socketedColumn)
             {
-                GenerateColumn(rows, true);
+                GenerateColumn(i, rows, true);
             }
             else
             {
-                GenerateColumn(rows, false);
+                GenerateColumn(i, rows, false);
             }
             spawnPosition.x += cubeSize.x + cubeSpacing;
 
         }
     }
 
-    private void GenerateColumn(int height, bool socketed)
+    private void GenerateColumn(int index, int height, bool socketed)
     {
         GenerateColumn tempColumn = new GenerateColumn();
 
-        tempColumn.InitializeColumn(transform, height, socketed);
+        tempColumn.InitializeColumn(transform, index, height, socketed);
         spawnPosition.y = transform.position.y;
 
         wallCubes = new GameObject[height];
@@ -119,20 +130,36 @@ public class TheWall : MonoBehaviour
     }
     private void OnSocketExited(XRBaseInteractable arg0)
     {
-        foreach (GameObject cube in wallCubes)
+        if (generatedColumn.Count >= 1)
         {
-            Rigidbody rb = cube.GetComponent<Rigidbody>();
-            rb.isKinematic = true;
+            for (int i = 0; i < generatedColumn.Count; i++)
+            {
+                generatedColumn[i].ResetColumn();
+            }
         }
     }
     private void OnSocketEnter(XRBaseInteractable arg0)
     {
-        foreach (GameObject cube in wallCubes)
+        if (generatedColumn.Count >= 1)
         {
-            Rigidbody rb = cube.GetComponent<Rigidbody>();
-            rb.isKinematic = false;
+            for (int i = 0; i < generatedColumn.Count; i++)
+            {
+                generatedColumn[i].ActivateColumn();
+            }
         }
-        // OnSocketEnterEvent?.Invoke();
+    }
+    private void OnDestroyWall()
+    {
+        if (generatedColumn.Count >= 1)
+        {
+            for (int i = 0; i < generatedColumn.Count; i++)
+            {
+                int power = Random.Range(maxPower / 2, maxPower);
+                generatedColumn[i].DestroyColumn(power);
+            }
+        }
+
+        OnDestroy?.Invoke();
 
     }
 
@@ -168,13 +195,16 @@ public class GenerateColumn
 {
     [SerializeField] GameObject[] wallCubes;
     [SerializeField] bool isSocketed;
+    [SerializeField] int columnIndex;
     private bool isParented;
     private Transform parentObject;
     private Transform columnObject;
     private const string Column_name = "Column";
+    private const string Socketed_Column_name = "SocketedColumn";
 
-    public void InitializeColumn(Transform parent, int rows, bool socketed)
+    public void InitializeColumn(Transform parent, int index, int rows, bool socketed)
     {
+        columnIndex = index;
         parentObject = parent;
         wallCubes = new GameObject[rows];
         isSocketed = socketed;
@@ -187,7 +217,7 @@ public class GenerateColumn
             if (!isParented)
             {
                 isParented = true;
-                cube.name = Column_name;
+                SetColumnName(cube, columnIndex);
                 cube.transform.SetParent(parentObject);
                 columnObject = cube.transform;
 
@@ -204,6 +234,19 @@ public class GenerateColumn
             }
         }
     }
+
+    private void SetColumnName(GameObject column, int index)
+    {
+        if (isSocketed)
+        {
+            column.name = Socketed_Column_name;
+        }
+        else
+        {
+            column.name = Column_name;
+        }
+        column.name += index.ToString();
+    }
     public void DeleteColumn()
     {
         for (int i = 0; i < wallCubes.Length; i++)
@@ -215,4 +258,36 @@ public class GenerateColumn
         }
         wallCubes = new GameObject[0];
     }
+    public void DestroyColumn(int power)
+    {
+        foreach (GameObject cube in wallCubes)
+        {
+            Rigidbody rb = cube.GetComponent<Rigidbody>();
+            rb.isKinematic = false;
+            rb.constraints = RigidbodyConstraints.None;
+            cube.transform.SetParent(parentObject);
+            rb.AddRelativeForce(Random.onUnitSphere * power);
+        }
+        // OnSocketEnterEvent?.Invoke();
+    }
+
+    public void ActivateColumn()
+    {
+        foreach (GameObject cube in wallCubes)
+        {
+            Rigidbody rb = cube.GetComponent<Rigidbody>();
+            rb.isKinematic = false;
+            // rb.GetComponent<Material>().color = Color.red;
+        }
+    }
+
+    public void ResetColumn()
+    {
+        foreach (GameObject cube in wallCubes)
+        {
+            Rigidbody rb = cube.GetComponent<Rigidbody>();
+            rb.isKinematic = true;
+        }
+    }
+
 }

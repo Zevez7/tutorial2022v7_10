@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
@@ -35,6 +36,10 @@ public class DrawerInteractable2 : XRGrabInteractable
 
     [SerializeField]
     private Vector3 limitDistances = new Vector3(.02f, .02f, 0);
+
+    [SerializeField] AudioClip drawerMoveClip;
+
+    public AudioClip GetDrawerMoveClip => drawerMoveClip;
 
     void Start()
     {
