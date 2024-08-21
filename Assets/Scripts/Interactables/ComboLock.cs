@@ -14,6 +14,13 @@ public class ComboLock : MonoBehaviour
     private void OnUnlocked() => UnlockAction?.Invoke();
     public UnityEvent LockAction;
     private void OnLocked() => LockAction?.Invoke();
+
+    public UnityEvent ComboButtonPressed;
+
+    private void OnComboButtonPress() => ComboButtonPressed?.Invoke();
+
+
+
     [SerializeField] TMP_Text userInputText;
     [SerializeField] XrButtonInteractable[] comboButtons;
     [SerializeField] TMP_Text infoText;
@@ -33,6 +40,15 @@ public class ComboLock : MonoBehaviour
 
     [SerializeField] int[] comboValues = new int[3];
     [SerializeField] int[] inputValues;
+
+
+    [SerializeField] AudioClip lockComboClip;
+    public AudioClip GetLockClip => lockComboClip;
+    [SerializeField] AudioClip unlockComboClip;
+    public AudioClip GetUnlockClip => unlockComboClip;
+    [SerializeField] AudioClip comboButtonPressedClip;
+    public AudioClip GetComboPressedClip => comboButtonPressedClip;
+
 
     private int maxButtonPresses;
 
@@ -77,6 +93,10 @@ public class ComboLock : MonoBehaviour
             if (buttonPresses == maxButtonPresses)
             {
                 CheckCombo();
+            }
+            else
+            {
+                OnComboButtonPress();
             }
 
         }
@@ -146,6 +166,10 @@ public class ComboLock : MonoBehaviour
 
     private void ResetUserValues()
     {
+        if (isLocked)
+        {
+            OnLocked();
+        }
         inputValues = new int[maxButtonPresses];
         userInputText.text = "";
         buttonPresses = 0;

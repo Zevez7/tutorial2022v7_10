@@ -14,6 +14,7 @@ public class TheWall : MonoBehaviour
 
     [SerializeField] int socketPosition = 1;
     [SerializeField] XRSocketInteractor wallSocket;
+    public XRSocketInteractor GetWallSocket => wallSocket;
     [SerializeField] ExplosiveDevice explosiveDevice;
     [SerializeField] List<GenerateColumn> generatedColumn;
     GameObject[] wallCubes;
@@ -32,6 +33,9 @@ public class TheWall : MonoBehaviour
 
     public AudioClip GetDestroyClip => destroyWallClip;
 
+    [SerializeField] AudioClip socketClip;
+
+    public AudioClip GetSocketClip => socketClip;
     // Start is called before the first frame update
     void Start()
     {

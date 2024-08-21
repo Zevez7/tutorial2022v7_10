@@ -9,42 +9,36 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class SimpleUIControl : MonoBehaviour
 {
-    [SerializeField] XrButtonInteractable startButton;
-    [SerializeField] string[] msgStrings;
+    [SerializeField] ProgressControl progressControl;
     [SerializeField] TMP_Text[] msgTexts;
 
-    [SerializeField] GameObject keyIndicatorLight1;
-    [SerializeField] GameObject keyIndicatorLight2;
 
-    // Start is called before the first frame update
-    void Start()
+    void OnEnable()
     {
-        if (startButton != null)
+        if (progressControl != null)
         {
-            startButton.selectEntered.AddListener(OnStartButtonPressed);
-
+            progressControl.OnStartGame.AddListener(StartGame);
+            progressControl.OnChallengeComplete.AddListener(ChallengeComplete);
         }
-
     }
 
-    private void OnStartButtonPressed(SelectEnterEventArgs arg0)
+    private void ChallengeComplete(string arg0)
     {
-        Debug.Log("Start Button Pressed");
-        if (keyIndicatorLight1 != null && keyIndicatorLight2 != null)
-        {
-            keyIndicatorLight1.SetActive(true);
-            keyIndicatorLight2.SetActive(true);
-        }
-        SetText(msgStrings[1]);
+        SetText(arg0);
+    }
+
+    private void StartGame(string arg0)
+    {
+
+        SetText(arg0);
     }
 
     public void SetText(string msg)
     {
 
-        msgTexts[0].text = msg;
-        // for (int i = 0; i < msgStrings.Length; i++)
-        // {
-
-        // }
+        for (int i = 0; i < msgTexts.Length; i++)
+        {
+            msgTexts[i].text = msg;
+        }
     }
 }
